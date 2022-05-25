@@ -109,11 +109,4 @@ class OrganizationApplicationTests {
         matcher.appendTail(sb);
         return sb.toString();
     }
-
-    @Test
-    void test() {
-        String str = "ADD COLUMN `physicochemical_pressure` decimal(18, 6) NULL COMMENT '理化-压强(kpa)' AFTER `physicochemical_gram_weight`,";
-            System.out.println(str.split(",")[1]);
-
-    }
 }

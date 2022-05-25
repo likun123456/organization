@@ -5,6 +5,7 @@ import com.atcx.mapper.ActivityTeacherMapper;
 import com.atcx.pojo.Activity;
 import com.atcx.pojo.ActivityTeacher;
 import com.atcx.service.ActivityTeacherService;
+import com.atcx.util.ActivityStatusEnum;
 import com.atcx.util.PageResult;
 import com.atcx.util.QueryPageBean;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -13,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -68,7 +70,7 @@ public class ActivityTeacherServiceImpl extends ServiceImpl<ActivityTeacherMappe
         List<ActivityTeacher> list = getListByUserId(userId);
         System.out.println(list);
         //再过滤应该未处理和已经参加的活动
-        int[] arr = new int[list.size()];
+        Integer[] arr = new Integer[list.size()];
         int i = 0;
         for (ActivityTeacher activityTeacher : list) {
             if (activityTeacher.getState().equals("A")||activityTeacher.getState().equals("C")){
@@ -76,15 +78,16 @@ public class ActivityTeacherServiceImpl extends ServiceImpl<ActivityTeacherMappe
                 i++;
             }
         }
-        System.out.println("当前用户参加的活动ID" +  arr.toString());
+        System.out.println("当前用户参加的活动ID" + Arrays.toString(arr));
         //分页查询活动返回数据
         Page<Activity> activityPage = new Page<>(queryPageBean.getCurrentPage(), queryPageBean.getPageSize());
         QueryWrapper<Activity> wrapper = new QueryWrapper<>();
         if (arr.length>0){
-            for (int i1 : arr) {
-                wrapper.or().eq("id",i1);
-            }
-
+//            for (int i1 : arr) {
+//                wrapper.or().eq("id",i1);
+//            }
+            wrapper.eq("status", ActivityStatusEnum.PASS.getCode());
+            wrapper.in("id", arr);
             Page<Activity> page= activityMapper.selectPage(activityPage, wrapper);
             pageResult = new PageResult(page.getTotal(), page.getRecords());
         }else {

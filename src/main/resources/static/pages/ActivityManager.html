@@ -48,8 +48,10 @@
                 <el-table-column prop="realnumber" label="参与人数" align="center"></el-table-column>
                 <el-table-column label="操作" align="center">
                     <template slot-scope="scope">
-                        <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
-                        <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+                        <!--<el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
+                        <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>-->
+                        <el-button type="success" size="mini" @click="openPassDialog(scope.row)">通过</el-button>
+                        <el-button size="mini" type="danger" @click="openRejectDialog(scope.row)">驳回</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -78,7 +80,7 @@
                 <el-tabs v-model="activeName" type="card">
                     <el-tab-pane label="人员信息" name="first">
                         <el-form label-position="right" label-width="100px">
-                            <el-row>
+                            <!--<el-row>
                                 <el-col :span="24">
                                     <el-form-item label="活动类型">
                                         <el-select v-model="formData.actype" placeholder="请选择活动类型">
@@ -91,7 +93,7 @@
                                         </el-select>
                                     </el-form-item>
                                 </el-col>
-                            </el-row>
+                            </el-row>-->
                             <el-row>
                                 <el-col :span="24">
                                     <el-form-item label="活动名称">
@@ -155,6 +157,13 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                <tr>
+                                    <td>
+                                        <input v-model="checkAll" type="checkbox" @change="doCheckAll1">
+                                    </td>
+                                    <td>全选</td>
+                                    <td></td>
+                                </tr>
                                 <tr v-for="c in tableData">
                                     <td>
                                         <input :id="c.id" v-model="checkitemIds" type="checkbox" :value="c.id">
@@ -182,7 +191,7 @@
                 <el-tabs v-model="activeName" type="card">
                     <el-tab-pane label="活动信息" name="first">
                         <el-form label-position="right" label-width="100px">
-                            <el-row>
+                            <!--<el-row>
                                 <el-col :span="24">
                                     <el-form-item label="活动类型">
                                         <el-select v-model="formData.actype" placeholder="请选择活动类型">
@@ -195,7 +204,7 @@
                                         </el-select>
                                     </el-form-item>
                                 </el-col>
-                            </el-row>
+                            </el-row>-->
                             <el-row>
                                 <el-col :span="24">
                                     <el-form-item label="活动名称">
@@ -259,6 +268,13 @@
                                 </tr>
                                 </thead>
                                 <tbody>
+                                <tr>
+                                    <td>
+                                        <input v-model="checkAll" type="checkbox" @change="doCheckAll">
+                                    </td>
+                                    <td>全选</td>
+                                    <td></td>
+                                </tr>
                                 <tr v-for="c in tableData">
                                     <td>
                                         <input :id="c.userid" v-model="checkitemIds" type="checkbox" :value="c.userid">
@@ -389,6 +405,7 @@
             formData: {},//表单数据
             tableData:[],//新增和编辑表单中对应的检查项列表数据
             checkitemIds:[],//新增和编辑表单中检查项对应的复选框，基于双向绑定可以进行回显和数据提交
+            checkAll: '',
             Ids:[],//存储所有人用户ID
             addActivityFormCom:false,//发布公共活动是否可见
             addActivityForm: false,//增加表单是否可见
@@ -480,6 +497,54 @@
                     });
                 });
             },
+            // 打开通过对话框
+            openPassDialog(row) {
+                this.$confirm('确定通过吗?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    let data = {
+                        id: row.id,
+                        status: 1
+                    }
+                    axios.post("/activity/changeStatus", data).then(res=>{
+                        if (res.data.flag){
+                            this.$message.success(res.data.message);
+                        } else {
+                            this.$message.error(res.data.message);
+                        }
+                        var that=this;
+                        window.setTimeout(function () {
+                            that.findPage();
+                        },2000)
+                    });
+                })
+            },
+            // 打开驳回对话框
+            openRejectDialog(row) {
+                this.$prompt('请输入驳回原因', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消'
+                }).then(value => {
+                    let data = {
+                        id: row.id,
+                        status: -1,
+                        rejectDesc: value
+                    }
+                    axios.post("/activity/changeStatus", data).then(res=>{
+                        if (res.data.flag){
+                            this.$message.success(res.data.message);
+                        } else {
+                            this.$message.error(res.data.message);
+                        }
+                        var that=this;
+                        window.setTimeout(function () {
+                            that.findPage();
+                        },2000)
+                    });
+                })
+            },
             // 重置表单
             resetForm() {
                 this.formData={}
@@ -497,6 +562,7 @@
                 axios.post("/activity/getTeachers").then(res=>{
                     //显示所有的检查项
                     this.tableData=res.data.data;
+                    this.tableData = this.tableData.filter(e => this.tableData.indexOf(e));
                 })
                 //将所有检查项取消选中
                 this.checkitemIds=[];
@@ -512,6 +578,7 @@
                 axios.post("/major/getAllMajor").then(res=>{
                     //显示所有的检查项
                     this.tableData=res.data.data;
+                    this.tableData = this.tableData.filter(e => this.tableData.indexOf(e));
                 })
                 //将所有检查项取消选中
                 this.checkitemIds=[];
@@ -521,6 +588,10 @@
             handleAddCom(){
                 //首先发送请求获取Ids
                 console.log(this.checkitemIds);
+                if (new Date(this.formData.starttime) >= new Date(this.formData.endtime)) {
+                    this.$message.error("开始时间不能大于等于结束时间!")
+                    return;
+                }
                 axios.post("/major-teacher/getAllUserId",this.checkitemIds).then(res=>{
                     if (res.data.flag){
                         this.Ids = res.data.data;
@@ -549,6 +620,11 @@
                 this.formData.starttime = dayjs(this.formData.starttime).format("YYYY-MM-DD HH:mm:ss");
                 this.formData.endtime = dayjs(this.formData.endtime).format("YYYY-MM-DD HH:mm:ss");
                 console.log(this.formData.starttime);
+                console.log(this.checkitemIds)
+                if (new Date(this.formData.starttime) >= new Date(this.formData.endtime)) {
+                    this.$message.error("开始时间不能大于等于结束时间!")
+                    return;
+                }
                 axios.post("/activity/addActivity?ids="+this.checkitemIds,this.formData).then(res=>{
                     if (res.data.flag){
                         this.$message.success(res.data.message);
@@ -561,6 +637,22 @@
                         that.findPage();
                     },2000)
                 })
+            },
+            doCheckAll() {
+                this.checkitemIds = [];
+                if (this.checkAll) {
+                    this.checkitemIds = this.tableData.map(e => e.userid)
+                } else {
+                    this.checkitemIds = [];
+                }
+            },
+            doCheckAll1() {
+                this.checkitemIds = [];
+                if (this.checkAll) {
+                    this.checkitemIds = this.tableData.map(e => e.id)
+                } else {
+                    this.checkitemIds = [];
+                }
             },
 
         }

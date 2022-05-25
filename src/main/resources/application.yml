@@ -1,6 +1,12 @@
 server:
   port: 8085
 spring:
+  mail:
+    host: smtp.qq.com
+    protocol: smtps
+    username: 1009768549@qq.com
+    password: twzfblrgzbqjbegf
+    port: 465
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql:///organization

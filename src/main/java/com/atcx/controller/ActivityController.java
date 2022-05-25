@@ -11,10 +11,12 @@ import com.atcx.service.ActivityService;
 import com.atcx.service.ActivityTeacherService;
 import com.atcx.service.MajorService;
 import com.atcx.service.UserService;
-import com.atcx.util.PageResult;
-import com.atcx.util.QueryPageBean;
-import com.atcx.util.Result;
+import com.atcx.util.*;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,11 +24,15 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -105,6 +111,7 @@ public class ActivityController {
     }
     //添加活动信息:state为A表未知，B表参与，C表不参与
     @RequestMapping("addActivity")
+    @Transactional(rollbackFor = Exception.class)
     public Result addActivity(@RequestBody Activity activity,Integer[] ids,HttpServletRequest request){
 //        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 //        Cookie[] cookies = request.getCookies();
@@ -126,12 +133,45 @@ public class ActivityController {
         int on = activityService.addActivityOn(activityByName, ids);
         if (i>0){
             result = new Result(true,"添加活动信息成功,邀请失败人数"+on);
+            // 给管理员发邮件
+            try {
+                List<String> emailList = userService.listObjs(new LambdaQueryWrapper<User>()
+                        .select(User::getEmail)
+                        .eq(User::getRank, "C"), Object::toString);
+                emailList = emailList.stream().filter(e -> e != null && !e.equals("")).collect(Collectors.toList());
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss");
+                List<String> finalEmailList = emailList;
+                new Thread(() -> finalEmailList.forEach(email -> {
+                    String content = null;
+                    try {
+                        content = "您有新的活动待审核\n" +
+                                "名称：" + activity.getActivityname() + "\n" +
+                                "时间:" + simpleDateFormat.format(DateFormat.getDateInstance().parse(activity.getStarttime().toString())) + "至" + simpleDateFormat.format(DateFormat.getInstance().parse(activity.getEndtime().toString())) + "\n" +
+                                "地点:" + activity.getPlace() + "\n" +
+                                "发起人:" + activity.getPromoter() + "\n" +
+                                "请进入系统查看";
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        content = "您有新的活动待审核\n" +
+                                "名称：" + activity.getActivityname() + "\n" +
+                                "时间:" + activity.getStarttime() + "至" + activity.getEndtime() + "\n" +
+                                "地点:" + activity.getPlace() + "\n" +
+                                "发起人:" + activity.getPromoter() + "\n" +
+                                "请进入系统查看";
+                    }
+                    EmailUtil.sendSimpleMail(new MailSendDTO(email, "活动审核", content));
+                })).start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }else {
             result = new Result(false,"添加活动信息失败");
         }
 
         return result;
     }
+
+
     //修改
     @RequestMapping("updateActivity")
     public Result updateActivity(@RequestBody Activity activity){
@@ -164,6 +204,12 @@ public class ActivityController {
             result = new Result(true,"查询活动信息失败");
         }
         return  result;
+    }
+
+    @PostMapping("/changeStatus")
+    public Result changeStatus(@RequestBody Activity activity) {
+        boolean updateResult = activityService.updateById(activity);
+        return new Result(updateResult, updateResult ? "操作成功" : "操作失败");
     }
 
 }

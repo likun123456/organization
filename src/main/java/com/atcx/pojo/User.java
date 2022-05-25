@@ -35,5 +35,8 @@ public class User implements Serializable {
     @TableField("`rank`")
     private String rank;
 
+    @TableField("`email`")
+    private String email;
+
 
 }

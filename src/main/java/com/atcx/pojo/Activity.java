@@ -50,5 +50,10 @@ public class Activity implements Serializable {
 
     private Integer realnumber;
 
+    private Integer status;
+
+    @TableField("rejectdesc")
+    private String rejectDesc;
+
 
 }
