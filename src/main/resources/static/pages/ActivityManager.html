@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>活动管理</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="../vue/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="../vue/axios.v0.21.1.min.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../plugins/elementui/index.css">
+    <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        body{ margin: 0;padding: 0}
+        .demo-form-inline{padding-top: 20px;inset-block: auto;float: left}
+        .one{padding: 10px;margin-top: 20px;}
+        .table{text-align: center;}
+        #footer{width:100%;height: 60px;margin-left: 450px;margin-right: 250px;margin: 0 auto}
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <el-row>
+        <el-col :span="24">
+            <div class="filter-container">
+                <el-input placeholder="活动名称" v-model="pagination.queryString" style="width: 200px;" class="filter-item"></el-input>
+                <el-button @click="findPage()" class="dalfBut">查询</el-button>
+                <el-button type="primary" class="butT" @click="handleCreate()">自定义</el-button>
+                <el-button type="primary" class="butT" @click="handleCreateCom()">公共</el-button>
+            </div>
+        </el-col>
+    </el-row>
+    <el-row>
+        <el-col :span="24">
+            <el-table size="small" current-row-key="id" :data="dataList" stripe highlight-current-row>
+                <el-table-column type="index" align="center" label="序号"></el-table-column>
+                <el-table-column prop="activityname" label="活动名称" align="center"></el-table-column>
+                <el-table-column prop="starttime" label="开始时间" align="center"></el-table-column>
+                <el-table-column prop="endtime" label="结束时间" align="center"></el-table-column>
+                <el-table-column prop="place" label="地点" align="center"></el-table-column>
+                <el-table-column prop="promoter" label="发起人" align="center"></el-table-column>
+                <el-table-column prop="shouldnumber" label="邀请人数" align="center"></el-table-column>
+                <el-table-column prop="realnumber" label="参与人数" align="center"></el-table-column>
+                <el-table-column label="操作" align="center">
+                    <template slot-scope="scope">
+                        <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
+                        <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-col>
+    </el-row>
+    <div  id="footer">
+        <el-row>
+            <el-col :span="24">
+                <div class="pagination-container">
+                    <el-pagination
+                            class="pagiantion"
+                            @current-change="handleCurrentChange"
+                            :current-page="pagination.currentPage"
+                            :page-size="pagination.pageSize"
+                            layout="total, prev, pager, next, jumper"
+                            :total="pagination.total">
+                    </el-pagination>
+                </div>
+            </el-col>
+        </el-row>
+    </div>
+    <!-- 添加公共活动 -->
+    <div class="add-form">
+        <el-dialog title="添加活动" :visible.sync="addActivityFormCom">
+            <template>
+                <el-tabs v-model="activeName" type="card">
+                    <el-tab-pane label="人员信息" name="first">
+                        <el-form label-position="right" label-width="100px">
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="活动类型">
+                                        <el-select v-model="formData.actype" placeholder="请选择活动类型">
+                                            <el-option
+                                                    v-for="item in options"
+                                                    :key="item.index"
+                                                    :label="item.value"
+                                                    :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="活动名称">
+                                        <el-input v-model="formData.activityname" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="开始时间">
+                                        <div class="block">
+                                            <span class="demonstration"></span>
+                                            <el-date-picker
+                                                    v-model="formData.starttime"
+                                                    type="datetime"
+                                                    placeholder="选择日期时间">
+                                            </el-date-picker>
+                                        </div>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="结束时间">
+                                        <div class="block">
+                                            <span class="demonstration"></span>
+                                            <el-date-picker
+                                                    v-model="formData.endtime"
+                                                    type="datetime"
+                                                    placeholder="选择日期时间">
+                                            </el-date-picker>
+                                        </div>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="地点">
+                                        <el-input v-model="formData.place" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="活动内容">
+                                        <el-input v-model="formData.content" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </el-form>
+                    </el-tab-pane>
+                    <el-tab-pane label="专业信息" name="second">
+                        <div class="checkScrol">
+                            <table class="datatable">
+                                <thead>
+                                <tr>
+                                    <th>选择</th>
+                                    <th>系ID</th>
+                                    <th>系名称</th>
+                                    <th>系主任</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="c in tableData">
+                                    <td>
+                                        <input :id="c.id" v-model="checkitemIds" type="checkbox" :value="c.id">
+                                    </td>
+                                    <td><label :for="c.id">{{c.id}}</label></td>
+                                    <td><label :for="c.id">{{c.majorname}}</label></td>
+                                    <td><label :for="c.id">{{c.dean}}</label></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+            </template>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="addActivityFormCom = false">取消</el-button>
+                <el-button type="primary" @click="handleAddCom()">确定</el-button>
+            </div>
+        </el-dialog>
+    </div>
+    <!-- 添加用户标签弹层 -->
+    <div class="add-form">
+        <el-dialog title="添加活动" :visible.sync="addActivityForm">
+            <template>
+                <el-tabs v-model="activeName" type="card">
+                    <el-tab-pane label="活动信息" name="first">
+                        <el-form label-position="right" label-width="100px">
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="活动类型">
+                                        <el-select v-model="formData.actype" placeholder="请选择活动类型">
+                                            <el-option
+                                                    v-for="item in options"
+                                                    :key="item.index"
+                                                    :label="item.value"
+                                                    :value="item.value">
+                                            </el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="活动名称">
+                                        <el-input v-model="formData.activityname" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="开始时间">
+                                        <div class="block">
+                                            <span class="demonstration"></span>
+                                            <el-date-picker
+                                                    v-model="formData.starttime"
+                                                    type="datetime"
+                                                    placeholder="选择日期时间">
+                                            </el-date-picker>
+                                        </div>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="结束时间">
+                                        <div class="block">
+                                            <span class="demonstration"></span>
+                                            <el-date-picker
+                                                    v-model="formData.endtime"
+                                                    type="datetime"
+                                                    placeholder="选择日期时间">
+                                            </el-date-picker>
+                                        </div>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="地点">
+                                        <el-input v-model="formData.place" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="活动内容">
+                                        <el-input v-model="formData.content" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </el-form>
+                    </el-tab-pane>
+                    <el-tab-pane label="检查项信息" name="second">
+                        <div class="checkScrol">
+                            <table class="datatable">
+                                <thead>
+                                <tr>
+                                    <th>选择</th>
+                                    <th>职工ID</th>
+                                    <th>职工名称</th>
+
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="c in tableData">
+                                    <td>
+                                        <input :id="c.userid" v-model="checkitemIds" type="checkbox" :value="c.userid">
+                                    </td>
+                                    <td><label :for="c.userid">{{c.userid}}</label></td>
+                                    <td><label :for="c.userid">{{c.teacherName}}</label></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+            </template>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="addActivityForm = false">取消</el-button>
+                <el-button type="primary" @click="handleAdd()">确定</el-button>
+            </div>
+        </el-dialog>
+    </div>
+    <!--        编辑标签弹层-->
+    <div class="add-form">
+        <el-dialog title="修改活动信息" :visible.sync="updateActivityForm">
+            <template>
+                <el-tabs v-model="activeName" type="card">
+                    <el-tab-pane label="活动信息" name="first">
+                        <el-form label-position="right" label-width="100px">
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="活动类型">
+                                        <el-input v-model="formData.actype"/>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="活动名称">
+                                        <el-input v-model="formData.activityname" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="开始时间">
+                                        <el-input v-model="formData.starttime" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="结束时间">
+                                        <el-input v-model="formData.endtime" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="地点">
+                                        <el-input v-model="formData.place" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="活动内容">
+                                        <el-input v-model="formData.content" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="活动发起人">
+                                        <el-input v-model="formData.promoter" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="邀请人数">
+                                        <el-input v-model="formData.shouldnumber" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="参与人数">
+                                        <el-input v-model="formData.realnumber" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </el-form>
+                    </el-tab-pane>
+                </el-tabs>
+            </template>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="updateActivityForm = false">取消</el-button>
+                <el-button type="primary" @click="handleEdit()">确定</el-button>
+            </div>
+        </el-dialog>
+    </div>
+</div>
+<script src="https://unpkg.com/dayjs"></script>
+<script type="text/javascript">
+    Vue.prototype.dayjs = dayjs;
+    new Vue({
+        el:"#app",
+        data:{
+            pagination: {//分页相关模型数据
+                currentPage: 1,//当前页码
+                pageSize:10,//每页显示的记录数
+                total:0,//总记录数
+                queryString:null//查询条件
+            },
+            options:[
+                {   index:1,
+                    value:'教学',
+                },
+                {   index:2,
+                    value:'科研',
+                },
+                {   index:3,
+                    value:'知识竞赛',
+                }
+
+            ],
+            activeName:'first',
+            dataList: [],//当前页要展示的分页列表数据
+            formData: {},//表单数据
+            tableData:[],//新增和编辑表单中对应的检查项列表数据
+            checkitemIds:[],//新增和编辑表单中检查项对应的复选框，基于双向绑定可以进行回显和数据提交
+            Ids:[],//存储所有人用户ID
+            addActivityFormCom:false,//发布公共活动是否可见
+            addActivityForm: false,//增加表单是否可见
+            updateActivityForm:false,//编辑表单是否可见
+        },
+        //钩子函数，VUE对象初始化完成后自动执行
+        created(){
+            this.findPage();
+            this.getUserId();
+        },
+        methods: {
+            //请求用户ID
+            getUserId(){
+                axios.post("/activity/getUserId").then(res=>{
+                    console.log("查询用户ID")
+                })
+            },
+            handleCurrentChange(currentPage) {
+                //修改当前页码
+                this.pagination.currentPage=currentPage;
+                //重新刷新数据
+                this.findPage();
+            },
+            //修改乘客信息
+            handleEdit(){
+                axios.post("/activity/updateActivity",this.formData).then(res=>{
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                    this.updateActivityForm = false;
+                    var that=this;
+                    window.setTimeout(function () {
+                        that.findPage();
+                    },2000)
+                });
+            },
+
+            //分页查询
+            findPage(){
+                //定义后台分页参数
+                var param= {
+                    currentPage:this.pagination.currentPage,
+                    pageSize:this.pagination.pageSize,
+                    queryString:this.pagination.queryString
+                };
+                //后台数据库分页查询检查项
+                axios.post("/activity/findByPage",param)
+                    .then(res=>{
+                        console.log(res);
+                        //展示分页数据
+                        this.$message.success(res.data.message);
+                        this.dataList = res.data.data.rows;
+                        this.pagination.total=res.data.data.total;
+                    })
+            },
+            //弹出编辑信息
+            handleUpdate(row){
+                this.updateActivityForm=true;
+                //默认选中第一个tab
+                this.activeName='first';
+                //回显数据
+                this.formData=row;
+            },
+            //删除信息
+            handleDelete(row){
+                this.$confirm('确定要删除吗?', '删除提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    //执行后台的删除操作
+                    axios.post("/activity/deleteActivity?id="+row.id).then(res=>{
+                        if (res.data.flag){
+                            this.$message.success(res.data.message);
+                        } else {
+                            this.$message.error(res.data.message);
+                        }
+                        var that=this;
+                        window.setTimeout(function () {
+                            that.findPage();
+                        },2000)
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            // 重置表单
+            resetForm() {
+                this.formData={}
+            },
+            //1.弹出添加窗口
+            handleCreate() {
+                this.addActivityForm=true;
+                //默认选中第一个tab
+                this.activeName='first';
+                //重置表单
+                this.resetForm();
+                // this.formData.starttime='2022-08-05 14:56:23';
+                // this.formData.endtime='2022-08-05 14:56:23';
+                //查询所有的检查项信息
+                axios.post("/activity/getTeachers").then(res=>{
+                    //显示所有的检查项
+                    this.tableData=res.data.data;
+                })
+                //将所有检查项取消选中
+                this.checkitemIds=[];
+            },
+            //弹出公共添加活动窗口
+            handleCreateCom(){
+                this.addActivityFormCom=true;
+                //默认选中第一个tab
+                this.activeName='first';
+                //重置表单
+                this.resetForm();
+                //查询系信息
+                axios.post("/major/getAllMajor").then(res=>{
+                    //显示所有的检查项
+                    this.tableData=res.data.data;
+                })
+                //将所有检查项取消选中
+                this.checkitemIds=[];
+                // this.formData.starttime='2022-08-05 14:56:23';
+            },
+            //添加公共活动信息
+            handleAddCom(){
+                //首先发送请求获取Ids
+                console.log(this.checkitemIds);
+                axios.post("/major-teacher/getAllUserId",this.checkitemIds).then(res=>{
+                    if (res.data.flag){
+                        this.Ids = res.data.data;
+                        console.log("邀请的用户"+this.Ids);
+                    }
+                    this.formData.starttime = dayjs(this.formData.starttime).format("YYYY-MM-DD HH:mm:ss");
+                    this.formData.endtime = dayjs(this.formData.endtime).format("YYYY-MM-DD HH:mm:ss");
+                    axios.post("/activity/addActivity?ids="+this.Ids,this.formData).then(res=>{
+                        if (res.data.flag){
+                            this.$message.success(res.data.message);
+                        } else {
+                            this.$message.error(res.data.message);
+                        }
+                        this.addActivityFormCom = false;
+                        var that=this;
+                        window.setTimeout(function () {
+                            that.findPage();
+                        },2000)
+                    })
+
+                })
+            },
+            //添加活动信息
+            handleAdd(){
+                //处理时间格式
+                this.formData.starttime = dayjs(this.formData.starttime).format("YYYY-MM-DD HH:mm:ss");
+                this.formData.endtime = dayjs(this.formData.endtime).format("YYYY-MM-DD HH:mm:ss");
+                console.log(this.formData.starttime);
+                axios.post("/activity/addActivity?ids="+this.checkitemIds,this.formData).then(res=>{
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                    this.addActivityForm = false;
+                    var that=this;
+                    window.setTimeout(function () {
+                        that.findPage();
+                    },2000)
+                })
+            },
+
+        }
+    })
+</script>
+
+</body>
+</html>

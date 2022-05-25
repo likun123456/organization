@@ -1,0 +1,18 @@
+server:
+  port: 8085
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql:///organization
+    username: root
+    password: root
+  web:
+    resources:
+      static-locations: file:/F:/images/image/,classpath:/static/
+logging:
+  level:
+    com:
+      atcx:
+        mapper: debug
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*.xml

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="../vue/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="../vue/axios.v0.21.1.min.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../plugins/elementui/index.css">
+    <link rel="stylesheet" href="../plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <style>
+        body{ margin: 0;padding: 0}
+        .demo-form-inline{padding-top: 20px;inset-block: auto;float: left}
+        .one{padding: 10px;margin-top: 20px;}
+        .table{text-align: center;}
+        #footer{width:100%;height: 60px;margin-left: 450px;margin-right: 250px;margin: 0 auto}
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <el-row>
+        <el-col :span="24">
+            <div class="filter-container">
+                <el-input placeholder="姓名" v-model="pagination.queryString" style="width: 200px;" class="filter-item"></el-input>
+                <el-button @click="findPage()" class="dalfBut">查询</el-button>
+                <el-button type="primary" class="butT" @click="handleCreate()">新建</el-button>
+            </div>
+        </el-col>
+    </el-row>
+    <el-row>
+        <el-col :span="24">
+            <el-table size="small" current-row-key="id" :data="dataList" stripe highlight-current-row>
+                <el-table-column type="index" align="center" label="序号"></el-table-column>
+                <el-table-column prop="accountname" label="用户名称" align="center"></el-table-column>
+                <el-table-column prop="username" label="用户名" align="center"></el-table-column>
+                <el-table-column prop="password" label="密码" align="center"></el-table-column>
+                <el-table-column prop="rank" label="等级" align="center"></el-table-column>
+                <el-table-column label="操作" align="center">
+                    <template slot-scope="scope">
+                        <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
+                        <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-col>
+    </el-row>
+    <div  id="footer">
+        <el-row>
+            <el-col :span="24">
+                <div class="pagination-container">
+                    <el-pagination
+                            class="pagiantion"
+                            @current-change="handleCurrentChange"
+                            :current-page="pagination.currentPage"
+                            :page-size="pagination.pageSize"
+                            layout="total, prev, pager, next, jumper"
+                            :total="pagination.total">
+                    </el-pagination>
+                </div>
+            </el-col>
+        </el-row>
+    </div>
+    <!-- 添加用户标签弹层 -->
+    <div class="add-form">
+        <el-dialog title="添加用户" :visible.sync="addUserForm">
+            <template>
+                <el-tabs v-model="activeName" type="card">
+                    <el-tab-pane label="人员信息" name="first">
+                        <el-form label-position="right" label-width="100px">
+                            <el-row>
+                                <el-col :span="12">
+                                    <el-form-item label="用户名称">
+                                        <el-input v-model="formData.accountname"/>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="用户名">
+                                        <el-input v-model="formData.username" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="密码">
+                                        <el-input v-model="formData.password" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="等级">
+                                        <el-input v-model="formData.rank" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </el-form>
+                    </el-tab-pane>
+                </el-tabs>
+            </template>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="addUserForm = false">取消</el-button>
+                <el-button type="primary" @click="handleAdd()">确定</el-button>
+            </div>
+        </el-dialog>
+    </div>
+    <!--        编辑标签弹层-->
+    <div class="add-form">
+        <el-dialog title="编辑用户信息" :visible.sync="updateUserForm">
+            <template>
+                <el-tabs v-model="activeName" type="card">
+                    <el-tab-pane label="人员信息" name="first">
+                        <el-form label-position="right" label-width="100px">
+                            <el-row>
+                                <el-col :span="12">
+                                    <el-form-item label="用户Id">
+                                        <el-input v-model="formData.id"/>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="12">
+                                    <el-form-item label="用户名称">
+                                        <el-input v-model="formData.accountname"/>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="用户名">
+                                        <el-input v-model="formData.username" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="密码">
+                                        <el-input v-model="formData.password" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="等级">
+                                        <el-input v-model="formData.rank" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </el-form>
+                    </el-tab-pane>
+                </el-tabs>
+            </template>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="updateUserForm = false">取消</el-button>
+                <el-button type="primary" @click="handleEdit()">确定</el-button>
+            </div>
+        </el-dialog>
+    </div>
+</div>
+
+<script type="text/javascript">
+    new Vue({
+        el:"#app",
+        data:{
+            pagination: {//分页相关模型数据
+                currentPage: 1,//当前页码
+                pageSize:10,//每页显示的记录数
+                total:0,//总记录数
+                queryString:null//查询条件
+            },
+            dataList: [],//当前页要展示的分页列表数据
+            formData: {},//表单数据
+            addUserForm: false,//增加表单是否可见
+            updateUserForm:false,//编辑表单是否可见
+            activeName:''
+        },
+        //钩子函数，VUE对象初始化完成后自动执行
+        created(){
+            this.findPage();
+        },
+        methods: {
+            handleCurrentChange(currentPage) {
+                //修改当前页码
+                this.pagination.currentPage=currentPage;
+                //重新刷新数据
+                this.findPage();
+            },
+            //修改用户信息
+            handleEdit(){
+                axios.post("/user/updateUser",this.formData).then(res=>{
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                    this.updateUserForm = false;
+                    var that=this;
+                    window.setTimeout(function () {
+                        that.findPage();
+                    },2000)
+                });
+            },
+
+            //分页查询
+            findPage(){
+                //定义后台分页参数
+                var param= {
+                    currentPage:this.pagination.currentPage,
+                    pageSize:this.pagination.pageSize,
+                    queryString:this.pagination.queryString
+                };
+                //后台数据库分页查询检查项
+                axios.post("/user/findByPage",param)
+                    .then(res=>{
+                        console.log(res);
+                        //展示分页数据
+                        this.$message.success(res.data.message);
+                        this.dataList = res.data.data.rows;
+                        this.pagination.total=res.data.data.total;
+                    })
+            },
+            //弹出编辑信息
+            handleUpdate(row){
+                this.updateUserForm=true;
+                //默认选中第一个tab
+                this.activeName='first';
+                //回显数据
+                this.formData=row;
+            },
+            //删除信息
+            handleDelete(row){
+                this.$confirm('确定要删除吗?', '删除提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    //执行后台的删除操作
+                    axios.post("/user/deleteUser?id="+row.id).then(res=>{
+                        if (res.data.flag){
+                            this.$message.success(res.data.message);
+                        } else {
+                            this.$message.error(res.data.message);
+                        }
+                        var that=this;
+                        window.setTimeout(function () {
+                            that.findPage();
+                        },2000)
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            // 重置表单
+            resetForm() {
+                this.formData={}
+            },
+            //1.弹出添加窗口
+            handleCreate() {
+                this.addUserForm=true;
+                //默认选中第一个tab
+                this.activeName='first';
+                //重置表单
+                this.resetForm();
+            },
+            //添加乘客信息
+            handleAdd(){
+                axios.post("/user/addUser",this.formData).then(res=>{
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                    this.addUserForm = false;
+                    var that=this;
+                    window.setTimeout(function () {
+                        that.findPage();
+                    },2000)
+                })
+            },
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>系主任后台管理</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="../vue/vue.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+    <script src="../vue/axios.v0.21.1.min.js"></script>
+    <style>
+        body{ margin: 0;padding: 0}
+        .title{margin: 0}
+        .log{width: 32px;height:32px;border-radius: 50%;border: 1px solid #ffd04b}
+        #menu-right{float: right;}
+        a{text-decoration: none;color: white;
+        }
+        #mainBox{height: 100%;border:none;width: 100%}
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-row>
+        <el-col :span="24">
+            <el-menu
+                    :default-active="activeIndex2"
+                    class="el-menu-demo"
+                    mode="horizontal"
+                    background-color="#545c64"
+                    text-color="#fff"
+                    active-text-color="#ffd04b">
+                <el-menu-item index="1"><h1 class="title">基层教学组织管理系统</h1></el-menu-item>
+                <el-submenu index="2" id="menu-right">
+                    <template slot="title">
+                        <img src="../mm.webp" class="log">
+                        {{userName}}
+                    </template>
+                    <el-menu-item index="2-1" icon="el-icon-user-solid">用户信息
+                        <i class="el-icon-user-solid" @click="handleUpdate()"></i>
+                    </el-menu-item>
+                    <el-menu-item index="2-2">修改密码
+                        <i class="el-icon-edit" @click="handleUpdate()"></i>
+                    </el-menu-item>
+                    <el-menu-item index="2-2" @click="exit()"><a href="../login/index.html">退出</a>
+                        <i class="el-icon-error"></i></el-menu-item>
+                </el-submenu>
+                <el-menu-item index="3" id="menu-right">消息中心</el-menu-item>
+            </el-menu>
+        </el-col>
+    </el-row>
+    <el-row>
+        <el-col :span="4">
+            <el-menu
+                    id="left-nav"
+                    default-active="1"
+                    class="el-menu-vertical-demo"
+                    background-color="#545c64"
+                    text-color="#fff"
+                    active-text-color="#ffd04b">
+                <a href="UserManager.html" target="show">
+                    <el-menu-item index="1">
+                        <i class="el-icon-user-solid"></i>
+                        <span slot="title">用户管理</span>
+                    </el-menu-item>
+                </a>
+                <a href="MajorManager.html" target="show">
+                    <el-menu-item index="2">
+                        <i class="el-icon-s-grid"></i>
+                        <span slot="title">系管理</span>
+                    </el-menu-item>
+                </a>
+                <a href="TeacherManager.html" target="show">
+                    <el-menu-item index="3">
+                        <i class="el-icon-school"></i>
+                        <span slot="title">职工管理</span>
+                    </el-menu-item>
+                </a>
+                <a href="ActivityManager.html" target="show">
+                    <el-menu-item index="4">
+                        <i class="el-icon-menu"></i>
+                        <span slot="title">活动管理</span>
+                    </el-menu-item>
+                </a>
+                <!--数据统计-->
+                <el-submenu index="5">
+                    <template slot="title">
+                        <i class="el-icon-notebook-2"></i>
+                        <span>数据统计</span>
+                    </template>
+                    <el-menu-item-group>
+                        <a href="report-type.html" target="show">
+                            <el-menu-item index="1-1">活动类型</el-menu-item>
+                        </a>
+                        <a href="report-count.html" target="show">
+                            <el-menu-item index="1-2">活动数量</el-menu-item>
+                        </a>
+                    </el-menu-item-group>
+                </el-submenu>
+
+            </el-menu>
+        </el-col>
+
+        <el-col :span="20">
+            <iframe src="UserManager.html" id="mainBox" name="show"></iframe>
+        </el-col>
+    </el-row>
+    <!--        编辑标签弹层-->
+    <div class="add-form">
+        <el-dialog title="编辑用户信息" :visible.sync="updateUserForm">
+            <template>
+                <el-tabs v-model="activeName" type="card">
+                    <el-tab-pane label="人员信息" name="first">
+                        <el-form label-position="right" label-width="100px">
+                            <el-row>
+                                <el-col :span="12">
+                                    <el-form-item label="用户Id">
+                                        <el-input v-model="formData.id"/>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="12">
+                                    <el-form-item label="用户名称">
+                                        <el-input v-model="formData.accountname"/>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="用户名">
+                                        <el-input v-model="formData.username" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="密码">
+                                        <el-input v-model="formData.password" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="等级">
+                                        <el-input v-model="formData.rank" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                        </el-form>
+                    </el-tab-pane>
+                </el-tabs>
+            </template>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="updateUserForm = false">取消</el-button>
+                <el-button type="primary" @click="updateforuser()">确定</el-button>
+            </div>
+        </el-dialog>
+    </div>
+</div>
+
+<script type="text/javascript">
+    new Vue({
+        el:"#app",
+        data:{
+            "activeIndex2":'1',
+            userName:'',
+            user:{},
+            formData:{},
+            updateUserForm:false,//编辑表单是否可见
+            activeName:'',
+        },
+        created(){
+            this.getUser();
+        },
+        methods:{
+            updateforuser(){
+                axios.post("/user/updateUser",this.formData).then(res=>{
+                    if (res.data.flag){
+                        this.$message.success(res.data.message);
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                    this.updateUserForm = false;
+                    var that=this;
+                });
+            },
+            //查询用户信息
+            getUser(){
+                axios.post("/user/getUser").then(res=>{
+                    console.log(res.data.data);
+                    this.userName = res.data.data.accountname;
+                    this.user = res.data.data;
+                })
+            },
+            //弹出编辑信息
+            handleUpdate(){
+                this.updateUserForm=true;
+                //默认选中第一个tab
+                this.activeName='first';
+                //回显数据
+                this.formData=this.user;
+            },
+            //exit
+            exit(){
+                axios.post("/user/exit").then(res=>{
+                    console.log("退出");
+                });
+            }
+
+        },
+    });
+    //实现导航栏宽高自适应
+    $(function () {
+        setHeight();//页面加载完成后自动调用方法设置高度
+        function setHeight() {
+            var height = $(window).height() -60;
+            $("#left-nav").css("height",height+"px");
+            $("#mainBox").css("height",height+"px");
+
+        }
+        //页面高度发生改变重新设置
+        $(window).resize(function () {
+            setHeight();
+        });
+    });
+</script>
+</body>
+</html>

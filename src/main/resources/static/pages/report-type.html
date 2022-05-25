@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!--    引入Echarts-->
+    <script src="../vue/echarts.js"></script>
+    <script src="../vue/vue.js"></script>
+    <script src="../vue/axios.v0.21.1.min.js"></script>
+</head>
+<body>
+<div id="root" style="height: 600px;width: 800px">
+
+</div>
+</body>
+<script type="text/javascript">
+    var myEcharts =  echarts.init(document.getElementById("root"));
+    axios.get("/activity/getTypeReport").then(res=>{
+        myEcharts.setOption({
+            title: {
+                text: '活动类型'
+            },
+            series: [
+                {
+                    type: 'pie',
+                    data: res.data.data,
+                }
+            ]
+        });
+    })
+</script>
+</html>

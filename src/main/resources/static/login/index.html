@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-model="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <meta author="">
+    <title>登录 - 基层教学组织管理系统</title>
+    <link rel="stylesheet" type="text/css" href="loginstyle/style/register-login.css">
+    <script type="text/javascript" src="../vue/vue.js"></script>
+</head>
+<body>
+<div id="box">
+<div  class="cent-box">
+    <div class="cent-box-header">
+<!--        <img src='loginstyle/images/logo1.png'>-->
+    </div>
+
+    <div class="cont-main clearfix">
+        <div class="index-tab">
+            <div class="index-slide-nav">
+            </div>
+        </div>
+        <form :action="url">
+            <div class="login form">
+                <div class="group">
+                    <div class="group-ipt email">
+                        <input type="text" name="username" id="username" class="ipt" placeholder="输入登录账号" required>
+                    </div>
+                    <div class="group-ipt password">
+                        <input type="password" name="password" id="password" class="ipt" placeholder="输入登录密码" required>
+                    </div>
+                </div>
+                <div>
+                    角色：
+                    系主任<input type="radio" name="role" @change="adminLogin()" v-model="role" value="admin">
+                    普通用户<input type="radio" name="role" @change="userLogin()" v-model="role" value="user">
+                    系统管理员<input type="radio" name="role" @change="sysLogin()" v-model="role" value="sys">
+                </div>
+            </div>
+
+            <div class="button">
+                <input type="submit" class="login-btn register-btn" id="button"/>
+            </div>
+        </form>
+        <div class="remember clearfix">
+            <label class="remember-me"><span class="icon"><span class="zt"></span></span><input type="checkbox" name="remember-me" id="remember-me" class="remember-mecheck" checked>记住我</label>
+            <label class="forgot-password">
+                <a href="#">忘记密码？</a>
+            </label>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<div class="footer">
+    <p>Find 基层教学组织管理系统</p>
+    <p>organization& <a href="http://www.ujiuye.com">www.ujiuye.com</a>--2021</p>
+</div>
+<script type="text/javascript">
+    new Vue({
+        el:'#box',
+        data:{
+            url:'../user/adminLogin',
+            role:'admin',
+
+        },
+        methods:{
+            adminLogin(){
+                const  str = "admin";
+                if (str==this.role) {
+                    this.url='../user/adminLogin';
+                    // console.log("adminLogin被调用");
+                }
+            },
+            userLogin(){
+                if ('user'==this.role) {
+                    this.url='../user/userLogin';
+                    // console.log("userLogin被调用");
+                }
+            },
+            //  系统管理员登录
+            sysLogin(){
+                if ('sys'==this.role) {
+                    this.url='../user/sysLogin';
+                }
+            }
+        }
+    });
+</script>
+<script src='loginstyle/js/particles.js' type="text/javascript"></script>
+<script src='loginstyle/js/background.js' type="text/javascript"></script>
+<script src='loginstyle/js/jquery.min.js' type="text/javascript"></script>
+<script src='loginstyle/js/layer/layer.js' type="text/javascript"></script>
+</body>
+</html>
