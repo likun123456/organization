@@ -30,8 +30,8 @@
             <div class="filter-container">
                 <el-input placeholder="活动名称" v-model="pagination.queryString" style="width: 200px;" class="filter-item"></el-input>
                 <el-button @click="findPage()" class="dalfBut">查询</el-button>
-                <el-button type="primary" class="butT" @click="handleCreate()">自定义</el-button>
-                <el-button type="primary" class="butT" @click="handleCreateCom()">公共</el-button>
+                <el-button v-if="loginUserInfo.rank == 'A'" type="primary" class="butT" @click="handleCreate()">自定义</el-button>
+                <el-button v-if="loginUserInfo.rank == 'A'" type="primary" class="butT" @click="handleCreateCom()">公共</el-button>
             </div>
         </el-col>
     </el-row>
@@ -46,12 +46,21 @@
                 <el-table-column prop="promoter" label="发起人" align="center"></el-table-column>
                 <el-table-column prop="shouldnumber" label="邀请人数" align="center"></el-table-column>
                 <el-table-column prop="realnumber" label="参与人数" align="center"></el-table-column>
+                <el-table-column label="审核状态" align="center">
+                    <template slot-scope="scope">
+                        <el-tag v-if="scope.row.status == 0" effect="dark" size="mini" type="">待审核</el-tag>
+                        <el-tag v-if="scope.row.status == 1" effect="dark" size="mini" type="success">审核通过</el-tag>
+                        <el-tag v-if="scope.row.status == -1" effect="dark" size="mini" type="danger">未通过</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="rejectDesc" label="驳回原因" align="center"></el-table-column>
                 <el-table-column label="操作" align="center">
                     <template slot-scope="scope">
-                        <!--<el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
-                        <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>-->
-                        <el-button :disabled="scope.row.status != 0" type="success" size="mini" @click="openPassDialog(scope.row)">通过</el-button>
-                        <el-button :disabled="scope.row.status != 0" size="mini" type="danger" @click="openRejectDialog(scope.row)">驳回</el-button>
+                        <el-button v-if="loginUserInfo.rank == 'A'" :disabled="scope.row.status == 1" type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
+                        <el-button v-if="loginUserInfo.rank == 'A'" :disabled="scope.row.status == 1" size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+
+                        <el-button v-if="loginUserInfo.rank == 'C'" :disabled="scope.row.status != 0" type="success" size="mini" @click="openPassDialog(scope.row)">通过</el-button>
+                        <el-button v-if="loginUserInfo.rank == 'C'" :disabled="scope.row.status != 0" size="mini" type="danger" @click="openRejectDialog(scope.row)">驳回</el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -410,6 +419,7 @@
             addActivityFormCom:false,//发布公共活动是否可见
             addActivityForm: false,//增加表单是否可见
             updateActivityForm:false,//编辑表单是否可见
+            loginUserInfo: {},
         },
         //钩子函数，VUE对象初始化完成后自动执行
         created(){
@@ -419,8 +429,8 @@
         methods: {
             //请求用户ID
             getUserId(){
-                axios.post("/activity/getUserId").then(res=>{
-                    console.log("查询用户ID")
+                axios.post("/user/getUser").then(res=>{
+                    this.loginUserInfo = res.data.data;
                 })
             },
             handleCurrentChange(currentPage) {
@@ -433,6 +443,7 @@
             handleEdit(){
                 axios.post("/activity/updateActivity",this.formData).then(res=>{
                     if (res.data.flag){
+
                         this.$message.success(res.data.message);
                     } else {
                         this.$message.error(res.data.message);

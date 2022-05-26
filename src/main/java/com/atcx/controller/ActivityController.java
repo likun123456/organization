@@ -136,6 +136,7 @@ public class ActivityController {
                             "名称：" + activity.getActivityname() + "\n" +
                             "时间:" + activity.getStarttime().toString().replaceAll("T", " ") + "至" + activity.getEndtime().toString().replaceAll("T", " ") + "\n" +
                             "地点:" + activity.getPlace() + "\n" +
+                            "内容:" + activity.getContent() + "\n" +
                             "发起人:" + activity.getPromoter() + "\n" +
                             "请进入系统查看";
                     EmailUtil.sendSimpleMail(new MailSendDTO(email, "活动审核", content));
@@ -223,6 +224,8 @@ public class ActivityController {
                 String content = "您有活动待参加\n" +
                         "名称：" + activity.getActivityname() + "\n" +
                         "时间:" + activity.getStarttime().toString().replaceAll("T", " ") + "至" + activity.getEndtime().toString().replaceAll("T", " ") + "\n" + "地点:" + activity.getPlace() + "\n" +
+                        "地点:" + activity.getPlace() + "\n" +
+                        "内容:" + activity.getContent() + "\n" +
                         "发起人:" + activity.getPromoter() + "\n" +
                         "请进入系统查看";
                 EmailUtil.sendSimpleMail(new MailSendDTO(email, "活动参加:" + activity.getActivityname(), content));
@@ -255,6 +258,8 @@ public class ActivityController {
                 String content = user.getAccountname() + "您好,您发起的活动" + statusContent + "\n" +
                         "名称：" + activity.getActivityname() + "\n" +
                         "时间:" + activity.getStarttime().toString().replaceAll("T", " ") + "至" + activity.getEndtime().toString().replaceAll("T", " ") + "\n" + "地点:" + activity.getPlace() + "\n" +
+                        "地点:" + activity.getPlace() + "\n" +
+                        "内容:" + activity.getContent() + "\n" +
                         "发起人:" + activity.getPromoter() + "\n" +
                         "请进入系统查看";
                 EmailUtil.sendSimpleMail(new MailSendDTO(user.getEmail(), "活动审核结果通知", content));

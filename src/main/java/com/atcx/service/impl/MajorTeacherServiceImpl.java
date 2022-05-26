@@ -7,10 +7,12 @@ import com.atcx.pojo.ActivityTeacher;
 import com.atcx.pojo.Major;
 import com.atcx.pojo.MajorTeacher;
 import com.atcx.pojo.User;
+import com.atcx.service.MajorService;
 import com.atcx.service.MajorTeacherService;
 import com.atcx.service.UserService;
 import com.atcx.util.PageResult;
 import com.atcx.util.QueryPageBean;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -37,6 +39,10 @@ public class MajorTeacherServiceImpl extends ServiceImpl<MajorTeacherMapper, Maj
     private MajorMapper majorMapper;
     @Resource
     private UserService userService;
+
+    @Resource
+    private MajorService majorService;
+
     @Override
     public int addMajorTeacher(MajorTeacher majorTeacher) {
         int insert = majorTeacherMapper.insert(majorTeacher);
@@ -61,12 +67,17 @@ public class MajorTeacherServiceImpl extends ServiceImpl<MajorTeacherMapper, Maj
     }
 
     @Override
-    public PageResult findByPage(QueryPageBean queryPageBean) {
+    public PageResult findByPage(QueryPageBean queryPageBean, Integer userId) {
+        User loginUser = userService.getUserById(userId);
         Page<MajorTeacher> teacherPage = new Page<>(queryPageBean.getCurrentPage(), queryPageBean.getPageSize());
         QueryWrapper<MajorTeacher> wrapper = new QueryWrapper<>();
-        if (queryPageBean.getQueryString() != null&&queryPageBean.getQueryString().trim().length()!=0){
-            //有查询条件就添加查询条件
-            wrapper.eq("majorid",queryPageBean.getQueryString());
+        if (!"C".equalsIgnoreCase(loginUser.getRank())) {
+            List<Integer> majorList = majorService.listObjs(new LambdaQueryWrapper<Major>().select(Major::getId).eq(Major::getUserid, userId), o -> Integer.parseInt(o.toString()));
+//        if (queryPageBean.getQueryString() != null&&queryPageBean.getQueryString().trim().length()!=0){
+//            //有查询条件就添加查询条件
+//            wrapper.eq("majorid",queryPageBean.getQueryString());
+//        }
+            wrapper.in("majorid", majorList);
         }
         Page<MajorTeacher> page = majorTeacherMapper.selectPage(teacherPage,wrapper);
         System.out.println(page.getRecords());

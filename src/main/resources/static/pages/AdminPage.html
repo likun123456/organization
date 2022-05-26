@@ -37,11 +37,11 @@
                         <img src="../mm.webp" class="log">
                         {{userName}}
                     </template>
-                    <el-menu-item index="2-1" icon="el-icon-user-solid">用户信息
-                        <i class="el-icon-user-solid" @click="handleUpdate()"></i>
+                    <el-menu-item index="2-1" icon="el-icon-user-solid" @click="handleUpdate()">用户信息
+                        <i class="el-icon-user-solid"></i>
                     </el-menu-item>
-                    <el-menu-item index="2-2">修改密码
-                        <i class="el-icon-edit" @click="handleUpdate()"></i>
+                    <el-menu-item index="2-2" @click="handleUpdate()">修改密码
+                        <i class="el-icon-edit" ></i>
                     </el-menu-item>
                     <el-menu-item index="2-2" @click="exit()"><a href="../login/index.html">退出</a>
                         <i class="el-icon-error"></i></el-menu-item>
@@ -59,12 +59,12 @@
                     background-color="#545c64"
                     text-color="#fff"
                     active-text-color="#ffd04b">
-                <a href="UserManager.html" target="show">
+                <!--<a href="UserManager.html" target="show">
                     <el-menu-item index="1">
                         <i class="el-icon-user-solid"></i>
                         <span slot="title">用户管理</span>
                     </el-menu-item>
-                </a>
+                </a>-->
                 <!--<a href="MajorManager.html" target="show">
                     <el-menu-item index="2">
                         <i class="el-icon-s-grid"></i>
@@ -80,7 +80,7 @@
                 <a href="ActivityManager.html" target="show">
                     <el-menu-item index="4">
                         <i class="el-icon-menu"></i>
-                        <span slot="title">活动管理</span>
+                        <span slot="title">活动发起</span>
                     </el-menu-item>
                 </a>
                 <!--数据统计-->

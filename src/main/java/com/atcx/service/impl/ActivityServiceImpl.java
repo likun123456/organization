@@ -13,8 +13,9 @@ import com.atcx.pojo.ReportType;
 import com.atcx.pojo.User;
 import com.atcx.service.ActivityService;
 import com.atcx.service.ActivityTeacherService;
-import com.atcx.util.PageResult;
-import com.atcx.util.QueryPageBean;
+import com.atcx.service.UserService;
+import com.atcx.util.*;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -44,6 +46,9 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
     private MajorMapper majorMapper;
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserService userService;
     @Resource
     private MajorTeacherMapper majorTeacherMapper;
     @Resource
@@ -94,6 +99,27 @@ public class ActivityServiceImpl extends ServiceImpl<ActivityMapper, Activity> i
 
     @Override
     public int updateActivity(Activity activity) {
+        activity.setStatus(ActivityStatusEnum.AUDIT.getCode());
+        // 给管理员发邮件
+        try {
+            List<String> emailList = userService.listObjs(new LambdaQueryWrapper<User>()
+                    .select(User::getEmail)
+                    .eq(User::getRank, "C"), Object::toString);
+            emailList = emailList.stream().filter(e -> e != null && !e.equals("")).collect(Collectors.toList());
+            List<String> finalEmailList = emailList;
+            new Thread(() -> finalEmailList.forEach(email -> {
+                String content = "您有新的活动待审核\n" +
+                        "名称：" + activity.getActivityname() + "\n" +
+                        "时间:" + activity.getStarttime().toString().replaceAll("T", " ") + "至" + activity.getEndtime().toString().replaceAll("T", " ") + "\n" +
+                        "地点:" + activity.getPlace() + "\n" +
+                        "内容:" + activity.getContent() + "\n" +
+                        "发起人:" + activity.getPromoter() + "\n" +
+                        "请进入系统查看";
+                EmailUtil.sendSimpleMail(new MailSendDTO(email, "活动审核", content));
+            })).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         int i = activityMapper.updateById(activity);
         return i;
     }

@@ -23,7 +23,7 @@ public interface MajorTeacherService extends IService<MajorTeacher> {
     //根据用户ID和专业ID删除老师
     public int deleteTeacher(MajorTeacher majorTeacher);
     //分页查询
-    public PageResult findByPage(QueryPageBean queryPageBean);
+    public PageResult findByPage(QueryPageBean queryPageBean, Integer userId);
     //查询所有职工ID
     public int[] getAllUserId(Integer[] ids);
 

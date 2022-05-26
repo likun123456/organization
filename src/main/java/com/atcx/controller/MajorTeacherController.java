@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -51,8 +53,16 @@ public class MajorTeacherController {
     }
 
     @RequestMapping("findByPage")
-    public Result findByPage(@RequestBody QueryPageBean queryPageBean){
-        PageResult page = majorTeacherService.findByPage(queryPageBean);
+    public Result findByPage(@RequestBody QueryPageBean queryPageBean, HttpServletRequest request){
+        Integer userId = null;
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            if (cookie.getName().equals("userId")) {
+                String value = cookie.getValue();
+                userId = Integer.parseInt(value);
+            }
+        }
+        PageResult page = majorTeacherService.findByPage(queryPageBean, userId);
         if (page != null){
             result  = new Result(true,"查询职工信息成功",page);
         }else {
