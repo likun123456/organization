@@ -31,9 +31,9 @@
                 </div>
                 <div>
                     角色：
-                    系主任<input type="radio" name="role" @change="adminLogin()" v-model="role" value="admin">
-                    普通用户<input type="radio" name="role" @change="userLogin()" v-model="role" value="user">
-                    系统管理员<input type="radio" name="role" @change="sysLogin()" v-model="role" value="sys">
+                    <input type="radio" name="role" @change="adminLogin()" v-model="role" value="admin">系主任
+                    <input style="margin-left: 5px" type="radio" name="role" @change="userLogin()" v-model="role" value="user">普通用户
+                    <input style="margin-left: 5px" type="radio" name="role" @change="sysLogin()" v-model="role" value="sys">系统管理员
                 </div>
             </div>
 

@@ -42,7 +42,13 @@
                 <el-table-column prop="username" label="用户名" align="center"></el-table-column>
                 <el-table-column prop="email" label="邮箱" align="center"></el-table-column>
                 <el-table-column prop="password" label="密码" align="center"></el-table-column>
-                <el-table-column prop="rank" label="等级" align="center"></el-table-column>
+                <el-table-column label="等级" align="center">
+                    <template slot-scope="scope">
+                        <el-tag size="mini" v-if="scope.row.rank == 'A'" effect="dark" size="mini" type="" >系主任</el-tag>
+                        <el-tag size="mini" v-if="scope.row.rank == 'B'" effect="dark" size="mini" type="success" >普通教师</el-tag>
+                        <el-tag size="mini" v-if="scope.row.rank == 'C'" effect="dark" size="mini" type="warning" >管理员</el-tag>
+                    </template>
+                </el-table-column>
                 <el-table-column label="操作" align="center">
                     <template slot-scope="scope">
                         <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
@@ -106,7 +112,17 @@
                             <el-row>
                                 <el-col :span="24">
                                     <el-form-item label="等级">
-                                        <el-input v-model="formData.rank" type="textarea"></el-input>
+                                        <el-select v-model="formData.rank" placeholder="请选择等级">
+                                            <el-option
+                                                    v-for="item in role"
+                                                    :key="item.value"
+                                                    :label="item.name"
+                                                    :value="item.value">
+                                                <span style="float: left">{{ item.name }}</span>
+                                                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>
+                                            </el-option>
+                                        </el-select>
+<!--                                        <el-input v-model="formData.rank" type="textarea"></el-input>-->
                                     </el-form-item>
                                 </el-col>
                             </el-row>
@@ -165,7 +181,17 @@
                             <el-row>
                                 <el-col :span="24">
                                     <el-form-item label="等级">
-                                        <el-input v-model="formData.rank" type="textarea"></el-input>
+                                        <el-select v-model="formData.rank" placeholder="请选择等级">
+                                            <el-option
+                                                    v-for="item in role"
+                                                    :key="item.value"
+                                                    :label="item.name"
+                                                    :value="item.value">
+                                                <span style="float: left">{{ item.name }}</span>
+                                                <span style="float: right; color: #8492a6; font-size: 13px">{{ item.value }}</span>
+                                            </el-option>
+                                        </el-select>
+<!--                                        <el-input v-model="formData.rank" type="textarea"></el-input>-->
                                     </el-form-item>
                                 </el-col>
                             </el-row>
@@ -195,7 +221,8 @@
             formData: {},//表单数据
             addUserForm: false,//增加表单是否可见
             updateUserForm:false,//编辑表单是否可见
-            activeName:''
+            activeName:'',
+            role: [{value: 'A', name: '系主任'},{value: 'B', name: '普通教师'},{value: 'C', name: '管理员'}]
         },
         //钩子函数，VUE对象初始化完成后自动执行
         created(){
