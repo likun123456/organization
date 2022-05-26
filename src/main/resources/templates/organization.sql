@@ -1,17 +1,17 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : 本地连接
+ Source Server         : localhost
  Source Server Type    : MySQL
- Source Server Version : 50729
+ Source Server Version : 80028
  Source Host           : localhost:3306
  Source Schema         : organization
 
  Target Server Type    : MySQL
- Target Server Version : 50729
+ Target Server Version : 80028
  File Encoding         : 65001
 
- Date: 26/05/2022 08:24:36
+ Date: 26/05/2022 18:06:13
 */
 
 SET NAMES utf8mb4;
@@ -22,7 +22,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `activity`;
 CREATE TABLE `activity`  (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(0) NOT NULL AUTO_INCREMENT,
   `actype` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `activityname` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `starttime` datetime(0) NULL DEFAULT NULL,
@@ -30,9 +30,9 @@ CREATE TABLE `activity`  (
   `place` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `content` varchar(40) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   `promoter` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
-  `shouldnumber` int(11) NOT NULL,
-  `realnumber` int(11) NULL DEFAULT NULL,
-  `status` int(11) NOT NULL DEFAULT 0,
+  `shouldnumber` int(0) NOT NULL,
+  `realnumber` int(0) NULL DEFAULT NULL,
+  `status` int(0) NOT NULL DEFAULT 0,
   `rejectdesc` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 279 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
@@ -44,15 +44,16 @@ INSERT INTO `activity` VALUES (265, '科研', 'dabian', '2022-05-26 00:02:00', '
 INSERT INTO `activity` VALUES (266, '知识竞赛', '答辩', '2022-05-25 00:04:00', '2022-05-22 10:37:27', NULL, NULL, '张三', 6, 0, 0, NULL);
 INSERT INTO `activity` VALUES (267, '科研', '安康', '2022-05-30 00:00:00', '2022-05-31 00:00:00', '509', '答辩', '张三', 5, 1, 0, NULL);
 INSERT INTO `activity` VALUES (268, '教学', '科研', '2022-06-01 00:02:00', '2022-06-02 00:00:00', '890', '教研', '张三', 5, 0, 1, NULL);
-INSERT INTO `activity` VALUES (278, NULL, '家长会', '2022-05-25 17:23:23', '2022-05-25 17:23:25', '教室103', '教室103家长会', '张三', 6, 0, -1, '时间太短，请修改时间范围');
+INSERT INTO `activity` VALUES (278, NULL, '家长会', '2022-05-25 17:23:23', '2022-05-25 18:00:00', '教室103', '教室103家长会', '张三', 6, 0, 1, '在提交一次');
+INSERT INTO `activity` VALUES (279, NULL, '端午节会议', '2022-05-26 14:20:29', '2022-05-27 00:00:00', '会议室104', '关于端午节放假的通知', '张三', 6, 0, 0, NULL);
 
 -- ----------------------------
 -- Table structure for activity_teacher
 -- ----------------------------
 DROP TABLE IF EXISTS `activity_teacher`;
 CREATE TABLE `activity_teacher`  (
-  `activityid` int(11) NULL DEFAULT NULL,
-  `userid` int(11) NULL DEFAULT NULL,
+  `activityid` int(0) NULL DEFAULT NULL,
+  `userid` int(0) NULL DEFAULT NULL,
   `state` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
@@ -87,18 +88,24 @@ INSERT INTO `activity_teacher` VALUES (278, 9, 'B');
 INSERT INTO `activity_teacher` VALUES (278, 10, 'B');
 INSERT INTO `activity_teacher` VALUES (278, 4, 'A');
 INSERT INTO `activity_teacher` VALUES (278, 7, 'B');
+INSERT INTO `activity_teacher` VALUES (279, 7, 'B');
+INSERT INTO `activity_teacher` VALUES (279, 8, 'B');
+INSERT INTO `activity_teacher` VALUES (279, 9, 'B');
+INSERT INTO `activity_teacher` VALUES (279, 10, 'B');
+INSERT INTO `activity_teacher` VALUES (279, 4, 'B');
+INSERT INTO `activity_teacher` VALUES (279, 7, 'B');
 
 -- ----------------------------
 -- Table structure for major
 -- ----------------------------
 DROP TABLE IF EXISTS `major`;
 CREATE TABLE `major`  (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(0) NOT NULL AUTO_INCREMENT,
   `majorname` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `craetetime` datetime(0) NULL DEFAULT NULL,
   `dean` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
-  `userid` int(11) NULL DEFAULT NULL,
-  `numbers` int(11) NULL DEFAULT NULL,
+  `userid` int(0) NULL DEFAULT NULL,
+  `numbers` int(0) NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `userid`(`userid`) USING BTREE,
   CONSTRAINT `major_ibfk_1` FOREIGN KEY (`userid`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
@@ -120,8 +127,8 @@ INSERT INTO `major` VALUES (7, '艺术与设计科学系', '2022-03-01 13:34:09'
 -- ----------------------------
 DROP TABLE IF EXISTS `major_teacher`;
 CREATE TABLE `major_teacher`  (
-  `majorid` int(11) NOT NULL,
-  `userid` int(11) NOT NULL
+  `majorid` int(0) NOT NULL,
+  `userid` int(0) NOT NULL
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
@@ -176,7 +183,7 @@ INSERT INTO `major_teacher` VALUES (1, 7);
 -- ----------------------------
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`  (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(0) NOT NULL AUTO_INCREMENT,
   `accountname` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `username` varchar(20) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL,
   `email` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
@@ -241,6 +248,6 @@ INSERT INTO `user` VALUES (50, '李志程', 'asd6a5s65115', NULL, 'dsa4sd16a1sd'
 INSERT INTO `user` VALUES (51, '张志程', 'afsaf5d4f4f', NULL, 'adf4adf4', 'B');
 INSERT INTO `user` VALUES (53, '孙志程', 'da4f6af6a4f4', NULL, 'ada46a', 'B');
 INSERT INTO `user` VALUES (57, '王初语', 'dfgdghjgf', NULL, 'af4d1g65sg', 'B');
-INSERT INTO `user` VALUES (58, 'bruce', 'bruce', '1009768549@qq.com', 'admin', 'C');
+INSERT INTO `user` VALUES (59, '布鲁斯', 'bruce', '1009768549@qq.com', 'admin', 'C');
 
 SET FOREIGN_KEY_CHECKS = 1;
