@@ -17,6 +17,9 @@
     var myEcharts =  echarts.init(document.getElementById("root"));
     axios.get("/activity/getTypeReport").then(res=>{
         myEcharts.setOption({
+            tooltip: {
+                show: true
+            },
             title: {
                 text: '活动类型'
             },

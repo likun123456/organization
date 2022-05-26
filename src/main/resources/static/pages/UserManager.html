@@ -40,6 +40,7 @@
                 <el-table-column type="index" align="center" label="序号"></el-table-column>
                 <el-table-column prop="accountname" label="用户名称" align="center"></el-table-column>
                 <el-table-column prop="username" label="用户名" align="center"></el-table-column>
+                <el-table-column prop="email" label="邮箱" align="center"></el-table-column>
                 <el-table-column prop="password" label="密码" align="center"></el-table-column>
                 <el-table-column prop="rank" label="等级" align="center"></el-table-column>
                 <el-table-column label="操作" align="center">
@@ -97,6 +98,13 @@
                             </el-row>
                             <el-row>
                                 <el-col :span="24">
+                                    <el-form-item label="邮箱">
+                                        <el-input v-model="formData.email" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
                                     <el-form-item label="等级">
                                         <el-input v-model="formData.rank" type="textarea"></el-input>
                                     </el-form-item>
@@ -137,6 +145,13 @@
                                 <el-col :span="24">
                                     <el-form-item label="用户名">
                                         <el-input v-model="formData.username" type="textarea"></el-input>
+                                    </el-form-item>
+                                </el-col>
+                            </el-row>
+                            <el-row>
+                                <el-col :span="24">
+                                    <el-form-item label="邮箱">
+                                        <el-input v-model="formData.email" type="textarea"></el-input>
                                     </el-form-item>
                                 </el-col>
                             </el-row>
